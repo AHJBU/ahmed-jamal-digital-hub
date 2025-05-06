@@ -7,6 +7,7 @@ import { Facebook, Twitter, Linkedin, Instagram, Youtube } from 'lucide-react';
 const Footer: React.FC = () => {
   const { language, translations } = useSettings();
   const t = translations.footer;
+  const nav = translations.nav;
   const currentYear = new Date().getFullYear();
 
   return (
@@ -31,13 +32,13 @@ const Footer: React.FC = () => {
               {language === 'ar' ? 'روابط سريعة' : 'Quick Links'}
             </h3>
             <ul className="space-y-2">
-              {['cv', 'portfolio', 'blog', 'contact'].map((link) => (
+              {['cv', 'portfolio', 'applications', 'training', 'blog', 'contact'].map((link) => (
                 <li key={link}>
                   <Link 
-                    to={`/${link}`} 
+                    to={`/${link === 'cv' ? 'cv' : link}`} 
                     className="text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {translations.nav[link as keyof typeof translations.nav]}
+                    {nav[link === 'applications' ? 'apps' : link as keyof typeof nav]}
                   </Link>
                 </li>
               ))}
@@ -50,13 +51,13 @@ const Footer: React.FC = () => {
               {language === 'ar' ? 'استكشف' : 'Explore'}
             </h3>
             <ul className="space-y-2">
-              {['applications', 'training', 'achievements', 'literature'].map((link) => (
+              {['about', 'achievements', 'literature', 'press', 'resources'].map((link) => (
                 <li key={link}>
                   <Link 
                     to={`/${link}`} 
                     className="text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {translations.nav[link as keyof typeof translations.nav]}
+                    {nav[link as keyof typeof nav]}
                   </Link>
                 </li>
               ))}

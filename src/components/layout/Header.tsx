@@ -17,13 +17,16 @@ const Header: React.FC = () => {
   const { language, setLanguage, theme, setTheme, translations } = useSettings();
   const t = translations.nav;
 
-  const routes = [
+  const mainRoutes = [
     { name: t.home, path: '/' },
     { name: t.cv, path: '/cv' },
     { name: t.portfolio, path: '/portfolio' },
     { name: t.apps, path: '/applications' },
     { name: t.training, path: '/training' },
     { name: t.blog, path: '/blog' },
+  ];
+
+  const moreRoutes = [
     { name: t.about, path: '/about' },
     { name: t.achievements, path: '/achievements' },
     { name: t.literature, path: '/literature' },
@@ -45,7 +48,7 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            {routes.slice(0, 6).map((route) => (
+            {mainRoutes.map((route) => (
               <Link
                 key={route.path}
                 to={route.path}
@@ -57,11 +60,11 @@ const Header: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  {t.more}
+                  {language === 'ar' ? 'المزيد' : 'More'}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {routes.slice(6).map((route) => (
+                {moreRoutes.map((route) => (
                   <DropdownMenuItem key={route.path} asChild>
                     <Link to={route.path}>{route.name}</Link>
                   </DropdownMenuItem>
@@ -105,7 +108,7 @@ const Header: React.FC = () => {
             </SheetTrigger>
             <SheetContent side={language === 'ar' ? 'right' : 'left'}>
               <nav className="flex flex-col gap-4 mt-8">
-                {routes.map((route) => (
+                {[...mainRoutes, ...moreRoutes].map((route) => (
                   <Link
                     key={route.path}
                     to={route.path}

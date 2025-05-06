@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/profile" element={<AdminProfile />} />
             
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />

@@ -12,7 +12,7 @@ interface SettingsContextType {
   translations: Record<string, any>;
 }
 
-const defaultTranslations = {
+export const defaultTranslations = {
   en: {
     nav: {
       home: "Home",

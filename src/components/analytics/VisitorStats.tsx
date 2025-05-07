@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AreaChart } from '@/components/charts/AreaChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
+import DetailedVisitorStats from './DetailedVisitorStats';
 
 // Mock visitor data
 const visitorData = [
@@ -36,77 +37,76 @@ const deviceData = [
 ];
 
 const VisitorStats: React.FC = () => {
-  const [period, setPeriod] = useState('weekly');
+  const [mode, setPeriod] = useState('simple');
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle>Visitor Analytics</CardTitle>
-        <CardDescription>View website traffic and engagement statistics.</CardDescription>
-        <Tabs defaultValue="traffic" className="w-full pt-3">
-          <TabsList className="mb-8 w-full">
-            <TabsTrigger value="traffic" className="flex-1">Traffic</TabsTrigger>
-            <TabsTrigger value="sources" className="flex-1">Sources</TabsTrigger>
-            <TabsTrigger value="devices" className="flex-1">Devices</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex justify-end mb-6">
-            <TabsList>
-              <TabsTrigger 
-                value="weekly" 
-                className={period === 'weekly' ? 'bg-primary text-white' : ''}
-                onClick={() => setPeriod('weekly')}
-              >
-                Weekly
-              </TabsTrigger>
-              <TabsTrigger 
-                value="monthly" 
-                className={period === 'monthly' ? 'bg-primary text-white' : ''}
-                onClick={() => setPeriod('monthly')}
-              >
-                Monthly
-              </TabsTrigger>
-              <TabsTrigger 
-                value="yearly" 
-                className={period === 'yearly' ? 'bg-primary text-white' : ''}
-                onClick={() => setPeriod('yearly')}
-              >
-                Yearly
-              </TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="traffic" className="pt-4">
-            <AreaChart 
-              data={visitorData} 
-              xAxisKey="date" 
-              series={[
-                { name: 'Page Views', color: '#9b87f5' },
-                { name: 'Unique Visitors', color: '#1EAEDB' }
-              ]}
-            />
-          </TabsContent>
-          
-          <TabsContent value="sources" className="pt-4">
-            <div className="flex justify-center">
-              <PieChart 
-                data={sourceData}
-                innerRadius={60}
-                outerRadius={100}
-              />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="devices" className="pt-4">
-            <BarChart 
-              data={deviceData} 
-              xAxisKey="device" 
-              series={[{ name: 'Visitors', color: '#7E69AB' }]} 
-            />
-          </TabsContent>
-        </Tabs>
-      </CardHeader>
-    </Card>
+    <div>
+      <div className="flex justify-end mb-6">
+        <TabsList>
+          <TabsTrigger 
+            value="simple" 
+            className={mode === 'simple' ? 'bg-primary text-white' : ''}
+            onClick={() => setPeriod('simple')}
+          >
+            Simple View
+          </TabsTrigger>
+          <TabsTrigger 
+            value="detailed" 
+            className={mode === 'detailed' ? 'bg-primary text-white' : ''}
+            onClick={() => setPeriod('detailed')}
+          >
+            Detailed View
+          </TabsTrigger>
+        </TabsList>
+      </div>
+
+      {mode === 'simple' ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Visitor Analytics</CardTitle>
+            <CardDescription>View website traffic and engagement statistics.</CardDescription>
+            <Tabs defaultValue="traffic" className="w-full pt-3">
+              <TabsList className="mb-8 w-full">
+                <TabsTrigger value="traffic" className="flex-1">Traffic</TabsTrigger>
+                <TabsTrigger value="sources" className="flex-1">Sources</TabsTrigger>
+                <TabsTrigger value="devices" className="flex-1">Devices</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="traffic" className="pt-4">
+                <AreaChart 
+                  data={visitorData} 
+                  xAxisKey="date" 
+                  series={[
+                    { name: 'Page Views', color: '#9b87f5' },
+                    { name: 'Unique Visitors', color: '#1EAEDB' }
+                  ]}
+                />
+              </TabsContent>
+              
+              <TabsContent value="sources" className="pt-4">
+                <div className="flex justify-center">
+                  <PieChart 
+                    data={sourceData}
+                    innerRadius={60}
+                    outerRadius={100}
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="devices" className="pt-4">
+                <BarChart 
+                  data={deviceData} 
+                  xAxisKey="device" 
+                  series={[{ name: 'Visitors', color: '#7E69AB' }]} 
+                />
+              </TabsContent>
+            </Tabs>
+          </CardHeader>
+        </Card>
+      ) : (
+        <DetailedVisitorStats defaultPeriod="weekly" />
+      )}
+    </div>
   );
 };
 

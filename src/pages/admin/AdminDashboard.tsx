@@ -7,6 +7,8 @@ import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import VisitorStats from '@/components/analytics/VisitorStats';
 import { Eye, MessageSquare, Download, Users } from 'lucide-react';
 import ScrollReveal from '@/components/ui/scroll-reveal';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -27,9 +29,35 @@ const AdminDashboard: React.FC = () => {
     { action: 'Updated CV', target: 'Resume file', time: '1 week ago' }
   ];
 
+  // Check if database is connected
+  const isDatabaseConnected = false; // This would come from an API call in a real app
+
   return (
     <ProtectedRoute>
       <AdminLayout title="Dashboard">
+        {/* Database Connection Alert */}
+        {!isDatabaseConnected && (
+          <ScrollReveal>
+            <Alert className="mb-8 border-amber-500 bg-amber-50 dark:bg-amber-950/30">
+              <AlertTitle className="flex items-center">
+                Database Connection Required
+                <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
+                  Action Needed
+                </Badge>
+              </AlertTitle>
+              <AlertDescription>
+                <p className="mb-2">
+                  Your application is currently using mock data. To use real data, please configure your database
+                  connection in <code className="text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/50 px-1 rounded">src/config/database.config.ts</code>.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Once connected, your analytics, blog posts, and resources will be saved to and loaded from your database.
+                </p>
+              </AlertDescription>
+            </Alert>
+          </ScrollReveal>
+        )}
+        
         {/* Welcome Message */}
         <ScrollReveal>
           <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border">

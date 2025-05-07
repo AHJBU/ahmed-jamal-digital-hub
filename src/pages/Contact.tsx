@@ -2,35 +2,26 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import SecureContactForm from '@/components/contact/SecureContactForm';
+import ScrollReveal from '@/components/ui/scroll-reveal';
 
 const Contact: React.FC = () => {
   const { language } = useSettings();
   
   const pageTitle = language === 'ar' ? 'تواصل معي' : 'Contact Me';
-  const submitText = language === 'ar' ? 'إرسال الرسالة' : 'Send Message';
-  const namePlaceholder = language === 'ar' ? 'الاسم الكامل' : 'Full Name';
-  const emailPlaceholder = language === 'ar' ? 'البريد الإلكتروني' : 'Email Address';
-  const subjectPlaceholder = language === 'ar' ? 'الموضوع' : 'Subject';
-  const messagePlaceholder = language === 'ar' ? 'اكتب رسالتك هنا...' : 'Write your message here...';
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Form submission logic would go here
-  };
 
   return (
     <Layout>
       <div className="container py-12">
-        <h1 className="text-4xl font-bold mb-10">{pageTitle}</h1>
+        <ScrollReveal>
+          <h1 className="text-4xl font-bold mb-10">{pageTitle}</h1>
+        </ScrollReveal>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Information */}
-          <div className="lg:col-span-1">
+          <ScrollReveal delay={0.1} className="lg:col-span-1">
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-2xl font-semibold mb-6">
@@ -115,70 +106,19 @@ const Contact: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </ScrollReveal>
           
           {/* Contact Form */}
-          <div className="lg:col-span-2">
+          <ScrollReveal delay={0.2} className="lg:col-span-2">
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-2xl font-semibold mb-6">
                   {language === 'ar' ? 'أرسل لي رسالة' : 'Send Me a Message'}
                 </h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="name" className="block mb-2 text-sm">
-                        {language === 'ar' ? 'الاسم' : 'Name'}
-                      </label>
-                      <Input 
-                        id="name" 
-                        placeholder={namePlaceholder} 
-                        required 
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block mb-2 text-sm">
-                        {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-                      </label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder={emailPlaceholder} 
-                        required 
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="subject" className="block mb-2 text-sm">
-                      {language === 'ar' ? 'الموضوع' : 'Subject'}
-                    </label>
-                    <Input 
-                      id="subject" 
-                      placeholder={subjectPlaceholder} 
-                      required 
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="message" className="block mb-2 text-sm">
-                      {language === 'ar' ? 'الرسالة' : 'Message'}
-                    </label>
-                    <Textarea 
-                      id="message" 
-                      placeholder={messagePlaceholder} 
-                      rows={6} 
-                      required 
-                    />
-                  </div>
-                  
-                  <Button type="submit" className="w-full">
-                    {submitText}
-                  </Button>
-                </form>
+                <SecureContactForm />
               </CardContent>
             </Card>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </Layout>

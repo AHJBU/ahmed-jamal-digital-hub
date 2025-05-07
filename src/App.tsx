@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 // Public Pages
 import Index from "./pages/Index";
@@ -26,6 +27,8 @@ import Press from "./pages/Press";
 import Resources from "./pages/Resources";
 
 // Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminTwoFactor from "./pages/admin/AdminTwoFactor";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminApplications from "./pages/admin/AdminApplications";
@@ -36,6 +39,8 @@ import AdminLiterature from "./pages/admin/AdminLiterature";
 import AdminAbout from "./pages/admin/AdminAbout";
 import AdminPress from "./pages/admin/AdminPress";
 import AdminResources from "./pages/admin/AdminResources";
+import AdminBackup from "./pages/admin/AdminBackup";
+import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -46,40 +51,47 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/cv" element={<CV />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/applications" element={<Applications />} />
-            <Route path="/applications/:id" element={<ApplicationDetails />} />
-            <Route path="/training" element={<Training />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogPost />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/achievements/:id" element={<AchievementDetails />} />
-            <Route path="/literature" element={<Literature />} />
-            <Route path="/literature/:id" element={<LiteratureItem />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/press" element={<Press />} />
-            <Route path="/resources" element={<Resources />} />
+          <AuthProvider>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/cv" element={<CV />} />
+              <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/applications" element={<Applications />} />
+              <Route path="/applications/:id" element={<ApplicationDetails />} />
+              <Route path="/training" element={<Training />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/achievements" element={<Achievements />} />
+              <Route path="/achievements/:id" element={<AchievementDetails />} />
+              <Route path="/literature" element={<Literature />} />
+              <Route path="/literature/:id" element={<LiteratureItem />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/press" element={<Press />} />
+              <Route path="/resources" element={<Resources />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/profile" element={<AdminProfile />} />
-            <Route path="/admin/applications" element={<AdminApplications />} />
-            <Route path="/admin/training" element={<AdminTraining />} />
-            <Route path="/admin/blog" element={<AdminBlog />} />
-            <Route path="/admin/achievements" element={<AdminAchievements />} />
-            <Route path="/admin/literature" element={<AdminLiterature />} />
-            <Route path="/admin/about" element={<AdminAbout />} />
-            <Route path="/admin/press" element={<AdminPress />} />
-            <Route path="/admin/resources" element={<AdminResources />} />
-            
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              {/* Admin Auth Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/two-factor" element={<AdminTwoFactor />} />
+
+              {/* Protected Admin Routes */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/profile" element={<AdminProfile />} />
+              <Route path="/admin/applications" element={<AdminApplications />} />
+              <Route path="/admin/training" element={<AdminTraining />} />
+              <Route path="/admin/blog" element={<AdminBlog />} />
+              <Route path="/admin/achievements" element={<AdminAchievements />} />
+              <Route path="/admin/literature" element={<AdminLiterature />} />
+              <Route path="/admin/about" element={<AdminAbout />} />
+              <Route path="/admin/press" element={<AdminPress />} />
+              <Route path="/admin/resources" element={<AdminResources />} />
+              <Route path="/admin/backup" element={<AdminBackup />} />
+              
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </SettingsProvider>

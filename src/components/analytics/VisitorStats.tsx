@@ -1,150 +1,112 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, BarChart, PieChart } from '@/components/ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AreaChart } from '@/components/charts/AreaChart';
+import { BarChart } from '@/components/charts/BarChart';
+import { PieChart } from '@/components/charts/PieChart';
 
-// Mock analytics data
-const visitorData = {
-  daily: [
-    { name: 'Mon', visitors: 450 },
-    { name: 'Tue', visitors: 630 },
-    { name: 'Wed', visitors: 850 },
-    { name: 'Thu', visitors: 790 },
-    { name: 'Fri', visitors: 550 },
-    { name: 'Sat', visitors: 380 },
-    { name: 'Sun', visitors: 420 },
-  ],
-  monthly: [
-    { name: 'Jan', visitors: 2800 },
-    { name: 'Feb', visitors: 3200 },
-    { name: 'Mar', visitors: 4100 },
-    { name: 'Apr', visitors: 3900 },
-    { name: 'May', visitors: 4600 },
-    { name: 'Jun', visitors: 5200 },
-  ],
-  sources: [
-    { name: 'Direct', value: 35 },
-    { name: 'Search', value: 28 },
-    { name: 'Social', value: 22 },
-    { name: 'Referral', value: 15 },
-  ],
-  pages: [
-    { name: 'Home', views: 3250 },
-    { name: 'Portfolio', views: 2430 },
-    { name: 'CV', views: 1980 },
-    { name: 'Blog', views: 1540 },
-    { name: 'Contact', views: 890 },
-  ],
-  // Add more metrics as needed
-};
+// Mock visitor data
+const visitorData = [
+  { date: 'Jan', 'Page Views': 4000, 'Unique Visitors': 2400 },
+  { date: 'Feb', 'Page Views': 3000, 'Unique Visitors': 1398 },
+  { date: 'Mar', 'Page Views': 2000, 'Unique Visitors': 9800 },
+  { date: 'Apr', 'Page Views': 2780, 'Unique Visitors': 3908 },
+  { date: 'May', 'Page Views': 1890, 'Unique Visitors': 4800 },
+  { date: 'Jun', 'Page Views': 2390, 'Unique Visitors': 3800 },
+  { date: 'Jul', 'Page Views': 3490, 'Unique Visitors': 4300 },
+  { date: 'Aug', 'Page Views': 2490, 'Unique Visitors': 4300 },
+  { date: 'Sep', 'Page Views': 2490, 'Unique Visitors': 4300 },
+  { date: 'Oct', 'Page Views': 2490, 'Unique Visitors': 4300 },
+  { date: 'Nov', 'Page Views': 2490, 'Unique Visitors': 4300 },
+  { date: 'Dec', 'Page Views': 2490, 'Unique Visitors': 4300 },
+];
 
-interface VisitorStatsProps {
-  className?: string;
-}
+const sourceData = [
+  { name: 'Direct', value: 40, color: '#4285F4' },
+  { name: 'Search', value: 30, color: '#34A853' },
+  { name: 'Social', value: 20, color: '#FBBC05' },
+  { name: 'Referral', value: 10, color: '#EA4335' },
+];
 
-const VisitorStats: React.FC<VisitorStatsProps> = ({ className }) => {
+const deviceData = [
+  { device: 'Desktop', 'Visitors': 4000 },
+  { device: 'Mobile', 'Visitors': 3000 },
+  { device: 'Tablet', 'Visitors': 1000 },
+];
+
+const VisitorStats: React.FC = () => {
+  const [period, setPeriod] = useState('weekly');
+
   return (
-    <div className={className}>
-      <Tabs defaultValue="overview">
-        <TabsList className="grid grid-cols-4 mb-4 w-full sm:w-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="traffic">Traffic</TabsTrigger>
-          <TabsTrigger value="pages">Pages</TabsTrigger>
-          <TabsTrigger value="sources">Sources</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Daily Visitors</CardTitle>
-                <CardDescription>Visitor count for the past 7 days</CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <AreaChart 
-                  data={visitorData.daily} 
-                  categories={['visitors']} 
-                  index="name" 
-                  colors={['blue']}
-                  valueFormatter={(value: number) => `${value} visitors`} 
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Traffic Sources</CardTitle>
-                <CardDescription>Where your visitors come from</CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <PieChart 
-                  data={visitorData.sources} 
-                  category="value" 
-                  index="name"
-                  valueFormatter={(value: number) => `${value}%`}
-                  colors={["indigo", "blue", "teal", "amber"]}
-                />
-              </CardContent>
-            </Card>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle>Visitor Analytics</CardTitle>
+        <CardDescription>View website traffic and engagement statistics.</CardDescription>
+        <Tabs defaultValue="traffic" className="w-full pt-3">
+          <TabsList className="mb-8 w-full">
+            <TabsTrigger value="traffic" className="flex-1">Traffic</TabsTrigger>
+            <TabsTrigger value="sources" className="flex-1">Sources</TabsTrigger>
+            <TabsTrigger value="devices" className="flex-1">Devices</TabsTrigger>
+          </TabsList>
+          
+          <div className="flex justify-end mb-6">
+            <TabsList>
+              <TabsTrigger 
+                value="weekly" 
+                className={period === 'weekly' ? 'bg-primary text-white' : ''}
+                onClick={() => setPeriod('weekly')}
+              >
+                Weekly
+              </TabsTrigger>
+              <TabsTrigger 
+                value="monthly" 
+                className={period === 'monthly' ? 'bg-primary text-white' : ''}
+                onClick={() => setPeriod('monthly')}
+              >
+                Monthly
+              </TabsTrigger>
+              <TabsTrigger 
+                value="yearly" 
+                className={period === 'yearly' ? 'bg-primary text-white' : ''}
+                onClick={() => setPeriod('yearly')}
+              >
+                Yearly
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </TabsContent>
-
-        <TabsContent value="traffic" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Monthly Traffic</CardTitle>
-              <CardDescription>Visitor trends over the past 6 months</CardDescription>
-            </CardHeader>
-            <CardContent className="h-96">
-              <AreaChart 
-                data={visitorData.monthly} 
-                categories={['visitors']} 
-                index="name"
-                colors={['blue']}
-                valueFormatter={(value: number) => `${value} visitors`} 
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="pages" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Popular Pages</CardTitle>
-              <CardDescription>Most viewed pages on your site</CardDescription>
-            </CardHeader>
-            <CardContent className="h-96">
-              <BarChart 
-                data={visitorData.pages} 
-                categories={['views']} 
-                index="name"
-                colors={['blue']}
-                valueFormatter={(value: number) => `${value} views`} 
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="sources" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Traffic Sources Breakdown</CardTitle>
-              <CardDescription>Detailed analysis of traffic sources</CardDescription>
-            </CardHeader>
-            <CardContent className="h-96">
+          
+          <TabsContent value="traffic" className="pt-4">
+            <AreaChart 
+              data={visitorData} 
+              xAxisKey="date" 
+              series={[
+                { name: 'Page Views', color: '#9b87f5' },
+                { name: 'Unique Visitors', color: '#1EAEDB' }
+              ]}
+            />
+          </TabsContent>
+          
+          <TabsContent value="sources" className="pt-4">
+            <div className="flex justify-center">
               <PieChart 
-                data={visitorData.sources} 
-                category="value" 
-                index="name"
-                valueFormatter={(value: number) => `${value}%`}
-                colors={["indigo", "blue", "teal", "amber"]}
+                data={sourceData}
+                innerRadius={60}
+                outerRadius={100}
               />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="devices" className="pt-4">
+            <BarChart 
+              data={deviceData} 
+              xAxisKey="device" 
+              series={[{ name: 'Visitors', color: '#7E69AB' }]} 
+            />
+          </TabsContent>
+        </Tabs>
+      </CardHeader>
+    </Card>
   );
 };
 

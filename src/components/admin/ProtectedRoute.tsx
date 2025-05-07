@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, needsTwoFactor } = useAuth();
   const location = useLocation();
   
   if (isLoading) {
@@ -21,6 +21,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         </div>
       </div>
     );
+  }
+  
+  // If 2FA is required, redirect to the 2FA page
+  if (needsTwoFactor) {
+    return <Navigate to="/admin/two-factor" state={{ from: location.pathname }} replace />;
   }
   
   if (!isAuthenticated) {

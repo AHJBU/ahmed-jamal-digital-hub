@@ -10,7 +10,15 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FeaturedPostsManager from '@/components/admin/FeaturedPostsManager';
-import WordPressImporter from '@/components/admin/WordPressImporter';
+import WordPressImportExport from '@/components/admin/WordPressImportExport';
+import BlogPostEditor from '@/components/admin/BlogPostEditor';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import ScrollReveal from '@/components/ui/scroll-reveal';
 
 // Mock blog posts data
@@ -64,6 +72,8 @@ const blogPosts = [
 
 const AdminBlog: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [currentPost, setCurrentPost] = useState<any>(null);
   
   const filteredPosts = searchQuery 
     ? blogPosts.filter(post => 
@@ -94,10 +104,18 @@ const AdminBlog: React.FC = () => {
   };
 
   const handleEdit = (id: number) => {
-    toast({
-      title: "Edit Blog Post",
-      description: `Editing blog post with ID: ${id}`,
-    });
+    // Find the post to edit
+    const postToEdit = blogPosts.find(post => post.id === id);
+    if (postToEdit) {
+      setCurrentPost(postToEdit);
+      setIsEditorOpen(true);
+    } else {
+      toast({
+        title: "Edit Blog Post",
+        description: `Post with ID ${id} not found`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -115,6 +133,19 @@ const AdminBlog: React.FC = () => {
     });
   };
 
+  const handleNewPost = () => {
+    setCurrentPost(null); // Clear current post for a new one
+    setIsEditorOpen(true);
+  };
+
+  const handleSavePost = (postData: any) => {
+    toast({
+      title: "Post Saved",
+      description: `Blog post "${postData.title}" has been saved.`,
+    });
+    setIsEditorOpen(false);
+  };
+
   return (
     <AdminLayout title="Blog Posts">
       <Tabs defaultValue="posts">
@@ -125,7 +156,7 @@ const AdminBlog: React.FC = () => {
               <TabsTrigger value="featured">Featured Posts</TabsTrigger>
               <TabsTrigger value="wordpress">WordPress</TabsTrigger>
             </TabsList>
-            <Button>
+            <Button onClick={handleNewPost}>
               <Plus className="mr-2 h-4 w-4" />
               New Blog Post
             </Button>
@@ -256,9 +287,29 @@ const AdminBlog: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="wordpress">
-          <WordPressImporter />
+          <WordPressImportExport />
         </TabsContent>
       </Tabs>
+
+      {/* Blog Post Editor Dialog */}
+      <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {currentPost ? `Edit: ${currentPost.title}` : 'Create New Blog Post'}
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details for your blog post. All fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <BlogPostEditor 
+              post={currentPost} 
+              onSave={handleSavePost} 
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

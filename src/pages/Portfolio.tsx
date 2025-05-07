@@ -5,6 +5,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import ScrollReveal from '@/components/ui/scroll-reveal';
 
 const Portfolio: React.FC = () => {
   const { language } = useSettings();
@@ -31,6 +32,13 @@ const Portfolio: React.FC = () => {
       description: {
         en: 'Responsive corporate website built with React',
         ar: 'موقع شركة متجاوب تم بناؤه باستخدام React'
+      },
+      features: {
+        hasGallery: true,
+        hasVideo: true,
+        hasTechnologies: true,
+        hasClientInfo: true,
+        hasLiveDemo: true
       }
     },
     {
@@ -44,6 +52,13 @@ const Portfolio: React.FC = () => {
       description: {
         en: 'E-commerce mobile application for Android and iOS',
         ar: 'تطبيق للتجارة الإلكترونية لأندرويد و iOS'
+      },
+      features: {
+        hasGallery: true,
+        hasVideo: false,
+        hasTechnologies: true,
+        hasClientInfo: true,
+        hasLiveDemo: false
       }
     },
     {
@@ -57,6 +72,13 @@ const Portfolio: React.FC = () => {
       description: {
         en: 'Complete brand identity design for a tech startup',
         ar: 'تصميم هوية بصرية كاملة لشركة ناشئة في مجال التكنولوجيا'
+      },
+      features: {
+        hasGallery: true,
+        hasVideo: false,
+        hasTechnologies: false,
+        hasClientInfo: true,
+        hasLiveDemo: false
       }
     },
     {
@@ -70,6 +92,13 @@ const Portfolio: React.FC = () => {
       description: {
         en: 'Product launch video with motion graphics',
         ar: 'فيديو إطلاق منتج مع رسومات متحركة'
+      },
+      features: {
+        hasGallery: false,
+        hasVideo: true,
+        hasTechnologies: false,
+        hasClientInfo: true,
+        hasLiveDemo: true
       }
     },
     {
@@ -83,6 +112,13 @@ const Portfolio: React.FC = () => {
       description: {
         en: 'Social media marketing campaign visuals',
         ar: 'تصاميم حملة تسويقية عبر وسائل التواصل الاجتماعي'
+      },
+      features: {
+        hasGallery: true,
+        hasVideo: false,
+        hasTechnologies: false,
+        hasClientInfo: true,
+        hasLiveDemo: false
       }
     },
     {
@@ -96,6 +132,13 @@ const Portfolio: React.FC = () => {
       description: {
         en: 'Interactive learning platform with course management',
         ar: 'منصة تعليمية تفاعلية مع نظام إدارة الدورات'
+      },
+      features: {
+        hasGallery: true,
+        hasVideo: true,
+        hasTechnologies: true,
+        hasClientInfo: false,
+        hasLiveDemo: true
       }
     }
   ];
@@ -114,41 +157,55 @@ const Portfolio: React.FC = () => {
         <h1 className="text-4xl font-bold mb-10">{pageTitle}</h1>
         
         {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-10">
-          {categories.map(category => (
-            <Badge 
-              key={category.id}
-              variant={activeCategory === category.id ? "default" : "outline"}
-              className="cursor-pointer text-sm py-2 px-4"
-              onClick={() => setActiveCategory(category.id)}
-            >
-              {category.name[language as keyof typeof category.name]}
-            </Badge>
-          ))}
-        </div>
+        <ScrollReveal>
+          <div className="flex flex-wrap gap-2 mb-10">
+            {categories.map(category => (
+              <Badge 
+                key={category.id}
+                variant={activeCategory === category.id ? "default" : "outline"}
+                className="cursor-pointer text-sm py-2 px-4"
+                onClick={() => setActiveCategory(category.id)}
+              >
+                {category.name[language as keyof typeof category.name]}
+              </Badge>
+            ))}
+          </div>
+        </ScrollReveal>
         
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map(project => (
-            <Link to={`/portfolio/${project.id}`} key={project.id}>
-              <Card className="overflow-hidden card-hover h-full">
-                <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={project.image} 
-                    alt={project.title[language as keyof typeof project.title]} 
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">
-                    {project.title[language as keyof typeof project.title]}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {project.description[language as keyof typeof project.description]}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+          {filteredProjects.map((project, index) => (
+            <ScrollReveal key={project.id} delay={0.1 * index}>
+              <Link to={`/portfolio/${project.id}`}>
+                <Card className="overflow-hidden card-hover h-full transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <div className="aspect-video relative overflow-hidden">
+                    <img 
+                      src={project.image} 
+                      alt={project.title[language as keyof typeof project.title]} 
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end">
+                      <div className="p-4 text-white">
+                        <Badge variant="secondary" className="mb-2">
+                          {project.category === 'web' ? 'Web Development' : 
+                           project.category === 'app' ? 'App Development' :
+                           project.category === 'graphic' ? 'Graphic Design' : 
+                           'Video Editing'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-2">
+                      {project.title[language as keyof typeof project.title]}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {project.description[language as keyof typeof project.description]}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            </ScrollReveal>
           ))}
         </div>
       </div>

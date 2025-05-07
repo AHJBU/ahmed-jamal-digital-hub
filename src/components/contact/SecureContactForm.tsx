@@ -1,265 +1,250 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/components/ui/use-toast';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Loader2, RefreshCw } from 'lucide-react';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage, Form } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertOctagon, CheckCircle, Send } from "lucide-react";
 
-// Strong validation schema with anti-spam measures
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Name must be at least 2 characters" })
-    .max(100, { message: "Name cannot exceed 100 characters" })
-    .regex(/^[a-zA-Z\s\u0600-\u06FF.,'-]+$/, { 
-      message: "Name contains invalid characters" 
-    }),
-  email: z
-    .string()
-    .email({ message: "Please enter a valid email address" })
-    .max(100, { message: "Email cannot exceed 100 characters" }),
-  subject: z
-    .string()
-    .min(3, { message: "Subject must be at least 3 characters" })
-    .max(200, { message: "Subject cannot exceed 200 characters" }),
-  message: z
-    .string()
-    .min(10, { message: "Message must be at least 10 characters" })
-    .max(3000, { message: "Message cannot exceed 3000 characters" }),
-  captcha: z
-    .string()
-    .min(1, { message: "Please solve the captcha" }),
-  honeypot: z
-    .string()
-    .max(0, { message: "Spam detected" })
-    .optional(),
+// Contact form validation schema
+const contactFormSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  subject: z.string().min(5, { message: "Subject must be at least 5 characters." }),
+  message: z.string().min(10, { message: "Message must be at least 10 characters." }),
+  // Hidden honeypot field to catch bots
+  website: z.string().optional(),
 });
 
-const SecureContactForm: React.FC = () => {
-  const { language } = useSettings();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Simple math captcha
-  const [captcha, setCaptcha] = useState(() => {
-    const num1 = Math.floor(Math.random() * 10);
-    const num2 = Math.floor(Math.random() * 10);
-    return { num1, num2, answer: num1 + num2 };
-  });
-  
-  const regenerateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 10);
-    const num2 = Math.floor(Math.random() * 10);
-    setCaptcha({ num1, num2, answer: num1 + num2 });
-    form.setValue('captcha', '');
-  };
+type ContactFormValues = z.infer<typeof contactFormSchema>;
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+interface SecureContactFormProps {
+  recipientEmail?: string;
+}
+
+export function SecureContactForm({ recipientEmail = "admin@example.com" }: SecureContactFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      subject: '',
-      message: '',
-      captcha: '',
-      honeypot: '',
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+      website: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true);
-    
-    // Verify captcha
-    if (Number(values.captcha) !== captcha.answer) {
-      form.setError('captcha', { 
-        type: 'custom', 
-        message: language === 'ar' ? 'الإجابة غير صحيحة' : 'Incorrect answer' 
-      });
-      setIsSubmitting(false);
+  useEffect(() => {
+    return () => {
+      // Clean up timeout on unmount
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [timeoutId]);
+
+  async function onSubmit(data: ContactFormValues) {
+    // Check if the honeypot field is filled (likely a bot)
+    if (data.website) {
+      // Fake success without actually submitting
+      setIsSubmitting(true);
+      const id = setTimeout(() => {
+        setIsSubmitting(false);
+        setIsSuccess(true);
+        form.reset();
+      }, 1500);
+      setTimeoutId(id);
       return;
     }
-    
+
     try {
-      // Simulated API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsSubmitting(true);
       
       // In a real app, this would be an API call
-      console.log('Form submitted:', values);
+      // await fetch("/api/contact", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ ...data, recipientEmail }),
+      // });
+
+      // Simulating API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Success handling
+      setIsSubmitting(false);
+      setIsSuccess(true);
+      form.reset();
       
-      // Successful submission
       toast({
-        title: language === 'ar' ? 'تم إرسال الرسالة' : 'Message Sent',
-        description: language === 'ar' 
-          ? 'سنتواصل معك قريباً' 
-          : 'We will contact you shortly',
+        title: "Message sent successfully!",
+        description: "I'll get back to you as soon as possible.",
       });
       
-      // Reset form
-      form.reset();
-      regenerateCaptcha();
+      // Reset success status after 5 seconds
+      const id = setTimeout(() => setIsSuccess(false), 5000);
+      setTimeoutId(id);
     } catch (error) {
-      console.error('Form submission error:', error);
+      setIsSubmitting(false);
+      
       toast({
         variant: "destructive",
-        title: language === 'ar' ? 'فشل الإرسال' : 'Submission Failed',
-        description: language === 'ar' 
-          ? 'حدث خطأ، يرجى المحاولة مرة أخرى' 
-          : 'An error occurred, please try again',
+        title: "Something went wrong!",
+        description: "Your message could not be sent. Please try again later.",
       });
-    } finally {
-      setIsSubmitting(false);
     }
-  };
-
-  const submitText = language === 'ar' ? 'إرسال الرسالة' : 'Send Message';
-  const namePlaceholder = language === 'ar' ? 'الاسم الكامل' : 'Full Name';
-  const emailPlaceholder = language === 'ar' ? 'البريد الإلكتروني' : 'Email Address';
-  const subjectPlaceholder = language === 'ar' ? 'الموضوع' : 'Subject';
-  const messagePlaceholder = language === 'ar' ? 'اكتب رسالتك هنا...' : 'Write your message here...';
+  }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{language === 'ar' ? 'الاسم' : 'Name'}</FormLabel>
-                <FormControl>
-                  <Input placeholder={namePlaceholder} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder={emailPlaceholder} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="subject"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{language === 'ar' ? 'الموضوع' : 'Subject'}</FormLabel>
-              <FormControl>
-                <Input placeholder={subjectPlaceholder} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="message"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{language === 'ar' ? 'الرسالة' : 'Message'}</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder={messagePlaceholder} 
-                  rows={6}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Honeypot field - hidden from users but bots will fill it */}
-        <FormField
-          control={form.control}
-          name="honeypot"
-          render={({ field }) => (
-            <FormItem style={{ display: 'none' }}>
-              <FormControl>
-                <Input 
-                  tabIndex={-1} 
-                  autoComplete="off"
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        {/* Captcha */}
-        <FormField
-          control={form.control}
-          name="captcha"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                {language === 'ar' ? 'تحقق الأمان' : 'Security Check'}
-              </FormLabel>
-              <div className="flex items-center space-x-3">
-                <div className="bg-secondary/50 p-2 px-4 rounded flex items-center">
-                  <span>{captcha.num1} + {captcha.num2} = ?</span>
-                </div>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={regenerateCaptcha}
-                  title={language === 'ar' ? 'تحديث' : 'Refresh'}
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <FormControl>
-                  <Input 
-                    className="w-20" 
-                    placeholder="?" 
-                    {...field}
-                    onChange={e => {
-                      // Only allow numbers
-                      const value = e.target.value.replace(/[^0-9]/g, '');
-                      field.onChange(value);
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormDescription>
-                {language === 'ar' 
-                  ? 'يرجى حل المسألة الرياضية البسيطة للمساعدة في منع الرسائل الآلية'
-                  : 'Please solve this simple math problem to help prevent automated messages'}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <Button 
-          type="submit" 
-          className="w-full" 
-          disabled={isSubmitting}
-        >
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {submitText}
-        </Button>
-      </form>
-    </Form>
-  );
-};
+    <Card>
+      <CardHeader>
+        <CardTitle>Get in Touch</CardTitle>
+        <CardDescription>
+          Fill out the form below and I'll get back to you as soon as possible.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Honeypot field - hidden from users, but bots might fill it */}
+            <div className="hidden">
+              <Label htmlFor="website">Website (Leave this empty)</Label>
+              <Input
+                id="website"
+                {...form.register("website")}
+                autoComplete="off"
+              />
+            </div>
 
-export default SecureContactForm;
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your email address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subject</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Message subject" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Message</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Your message"
+                      className="min-h-[120px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="text-sm text-muted-foreground">
+              Messages will be sent to: {recipientEmail}
+            </div>
+
+            <Separator />
+
+            {isSuccess ? (
+              <div className="bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-md p-4 flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5" />
+                <div>
+                  <p className="font-medium">Message sent successfully!</p>
+                  <p className="text-sm">I'll get back to you as soon as possible.</p>
+                </div>
+              </div>
+            ) : (
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Send Message
+                  </>
+                )}
+              </Button>
+            )}
+
+            <div className="text-sm text-muted-foreground mt-4">
+              <div className="flex items-center space-x-2 mb-1">
+                <AlertOctagon className="h-4 w-4 text-amber-500" />
+                <span>Your data is securely processed and never shared with third parties.</span>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}

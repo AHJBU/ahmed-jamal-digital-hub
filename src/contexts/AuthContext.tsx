@@ -1,34 +1,31 @@
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
+import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-// Define auth types
-interface User {
+interface UserData {
   id: string;
   name: string;
   email: string;
   role: string;
-  hasTwoFactor: boolean;
-  lastLogin: string;
+  twoFactorEnabled: boolean;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: UserData | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  verify2FA: (code: string) => Promise<boolean>;
   logout: () => void;
-  verifyTwoFactor: (code: string) => Promise<boolean>;
-  needsTwoFactor: boolean;
+  updateUser: (userData: Partial<UserData>) => void;
+  toggleTwoFactor: (enabled: boolean) => void;
 }
 
-// Create auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -39,156 +36,147 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [needsTwoFactor, setNeedsTwoFactor] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // Check for existing auth session on mount
+  // For demo purposes, these would normally be environment variables or securely stored
+  const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
+  const DEFAULT_ADMIN_USERNAME = 'admin';
+  const DEFAULT_ADMIN_PASSWORD = 'ASDqwe123#';
+
   useEffect(() => {
+    // Check for stored authentication
     const checkAuth = async () => {
       try {
-        const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('auth_user');
+        const storedToken = localStorage.getItem('auth_token');
         
         if (storedUser && storedToken) {
-          // In a real application, we would verify the token with the backend
-          setUser(JSON.parse(storedUser));
-          
-          // If on admin route but not logged in, redirect to login
-          if (location.pathname.startsWith('/admin') && !user) {
-            navigate('/admin/login');
-          }
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setIsAuthenticated(true);
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error('Authentication error:', error);
+        // Clear potentially corrupt storage
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('auth_token');
       } finally {
         setIsLoading(false);
       }
     };
     
     checkAuth();
-  }, [navigate, location, user]);
+  }, []);
 
-  // Login function
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Mock login for demonstration - would be replaced with actual API call
-      if (email === 'admin@example.com' && password === 'password') {
-        // Simulate 2FA check
-        const userWithTwoFactor = {
+      // This is a mock authentication for demo purposes
+      // In a real app, this would be an API call to your backend
+      
+      // Check if the credentials match the default admin
+      if ((email === DEFAULT_ADMIN_EMAIL || email === DEFAULT_ADMIN_USERNAME) && 
+          password === DEFAULT_ADMIN_PASSWORD) {
+        
+        const mockUser: UserData = {
           id: '1',
-          name: 'Ahmed Jamal',
-          email: 'admin@example.com',
+          name: 'Admin User',
+          email: DEFAULT_ADMIN_EMAIL,
           role: 'admin',
-          hasTwoFactor: true,
-          lastLogin: new Date().toISOString(),
+          twoFactorEnabled: false // 2FA disabled by default
         };
         
-        if (userWithTwoFactor.hasTwoFactor) {
-          setNeedsTwoFactor(true);
-          localStorage.setItem('pendingUser', JSON.stringify(userWithTwoFactor));
-          setIsLoading(false);
+        // Store auth data
+        localStorage.setItem('auth_user', JSON.stringify(mockUser));
+        localStorage.setItem('auth_token', 'mock_jwt_token');
+        
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        
+        // Redirect based on 2FA status
+        if (mockUser.twoFactorEnabled) {
+          navigate('/admin/two-factor');
           return true;
         } else {
-          // No 2FA needed, complete login
-          setUser(userWithTwoFactor);
-          localStorage.setItem('user', JSON.stringify(userWithTwoFactor));
-          localStorage.setItem('token', 'mock-token-123456');
-          setIsLoading(false);
+          navigate('/admin');
           return true;
         }
       }
       
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid email or password",
-      });
       return false;
     } catch (error) {
       console.error('Login error:', error);
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: "An unexpected error occurred",
-      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Verify 2FA code
-  const verifyTwoFactor = async (code: string): Promise<boolean> => {
+  const verify2FA = async (code: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Mock 2FA verification - would be replaced with actual API call
-      // For demo purpose, any 6-digit code will work
-      if (code.length === 6 && /^\d+$/.test(code)) {
-        const pendingUser = localStorage.getItem('pendingUser');
-        if (pendingUser) {
-          const parsedUser = JSON.parse(pendingUser);
-          setUser(parsedUser);
-          localStorage.setItem('user', pendingUser);
-          localStorage.setItem('token', 'mock-token-123456');
-          localStorage.removeItem('pendingUser');
-          setNeedsTwoFactor(false);
-          
-          toast({
-            title: "Authentication Successful",
-            description: "You have successfully logged in",
-          });
-          return true;
-        }
+      // Mock 2FA verification
+      // In a real app, this would verify the code against a backend
+      
+      // For demo purposes, any 6-digit code is accepted
+      if (/^\d{6}$/.test(code)) {
+        // Successfully verified
+        navigate('/admin');
+        return true;
       }
       
-      toast({
-        variant: "destructive",
-        title: "Verification Failed",
-        description: "Invalid verification code",
-      });
       return false;
     } catch (error) {
       console.error('2FA verification error:', error);
-      toast({
-        variant: "destructive",
-        title: "Verification Failed",
-        description: "An unexpected error occurred",
-      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Logout function
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('auth_token');
     navigate('/admin/login');
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out",
-    });
   };
 
-  const value = {
+  const updateUser = (userData: Partial<UserData>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+    }
+  };
+
+  const toggleTwoFactor = (enabled: boolean) => {
+    if (user) {
+      const updatedUser = { ...user, twoFactorEnabled: enabled };
+      setUser(updatedUser);
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+    }
+  };
+
+  const contextValue: AuthContextType = {
     user,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated,
     login,
+    verify2FA,
     logout,
-    verifyTwoFactor,
-    needsTwoFactor,
+    updateUser,
+    toggleTwoFactor
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthContext;

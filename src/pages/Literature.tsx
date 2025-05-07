@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const Literature: React.FC = () => {
   const { language, translations } = useSettings();
   const [activeTab, setActiveTab] = useState('all');
+  const animatedItems = useRef<(HTMLElement | null)[]>([]);
   
   // Mock literature data
   const literatureItems = [
@@ -72,39 +73,86 @@ const Literature: React.FC = () => {
                (activeTab === 'thoughts' && category.includes('thought'));
       });
 
+  // Scroll animation observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    );
+
+    animatedItems.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      animatedItems.current.forEach((el) => {
+        if (el) observer.unobserve(el);
+      });
+    };
+  }, [filteredItems]);
+
   return (
     <Layout>
       <div className="container py-12">
-        <h1 className="text-4xl font-bold mb-2">
-          {language === 'ar' ? 'الكتابات والاقتباسات' : 'Literature & Quotes'}
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          {language === 'ar' 
-            ? 'مجموعة من الكتابات الشخصية والاقتباسات الملهمة'
-            : 'A collection of personal writings and inspiring quotes'}
-        </p>
+        {/* Enhanced header section with animation */}
+        <div className="slide-up mb-4">
+          <h1 className="text-4xl font-bold mb-2">
+            {language === 'ar' ? 'الكتابات والاقتباسات' : 'Literature & Quotes'}
+          </h1>
+          <p className="text-muted-foreground">
+            {language === 'ar' 
+              ? 'مجموعة من الكتابات الشخصية والاقتباسات الملهمة'
+              : 'A collection of personal writings and inspiring quotes'}
+          </p>
+          
+          {/* Decorative underline */}
+          <div className="h-1 w-20 bg-primary mt-4 rounded-full"></div>
+        </div>
 
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList>
-            {categories.map(category => (
-              <TabsTrigger key={category.id} value={category.id}>
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        {/* Animated tabs */}
+        <div className="slide-in" style={{ animationDelay: '0.2s' }}>
+          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-8">
+            <TabsList className="bg-secondary/50 backdrop-blur-sm">
+              {categories.map(category => (
+                <TabsTrigger 
+                  key={category.id} 
+                  value={category.id}
+                  className="transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
+                >
+                  {category.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
-            <Link to={`/literature/${item.id}`} key={item.id}>
-              <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
-                <div className="aspect-video relative">
+          {filteredItems.map((item, index) => (
+            <Link 
+              to={`/literature/${item.id}`} 
+              key={item.id}
+              ref={(el) => animatedItems.current[index] = el as HTMLElement}
+              className="block"
+            >
+              <Card className="overflow-hidden h-full hover-lift animate-reveal">
+                <div className="aspect-video relative overflow-hidden group">
                   <img 
                     src={item.image} 
                     alt={item.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <Badge className="absolute top-3 right-3">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <Badge className="absolute top-3 right-3 z-10">
                     {item.category}
                   </Badge>
                 </div>
@@ -123,6 +171,9 @@ const Literature: React.FC = () => {
             </Link>
           ))}
         </div>
+        
+        {/* Decorative element */}
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mb-10 -ml-10"></div>
       </div>
     </Layout>
   );

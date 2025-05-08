@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ const formSchema = z.object({
 const AdminLogin: React.FC = () => {
   const { login, isLoading, isAuthenticated, needsTwoFactor } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -32,13 +33,18 @@ const AdminLogin: React.FC = () => {
   });
 
   useEffect(() => {
+    console.log("Login page auth state:", { isAuthenticated, needsTwoFactor, isLoading });
+    
     // If user is already authenticated, redirect to admin dashboard
     if (isAuthenticated && !isLoading && !needsTwoFactor) {
-      navigate('/admin');
+      console.log("Already authenticated, redirecting to admin dashboard");
+      const from = location.state?.from || '/admin';
+      navigate(from, { replace: true });
     } else if (needsTwoFactor && !isLoading) {
-      navigate('/admin/two-factor');
+      console.log("2FA required, redirecting to verification page");
+      navigate('/admin/two-factor', { replace: true });
     }
-  }, [isAuthenticated, isLoading, needsTwoFactor, navigate]);
+  }, [isAuthenticated, isLoading, needsTwoFactor, navigate, location]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log("Login attempt with", values);
@@ -48,10 +54,11 @@ const AdminLogin: React.FC = () => {
       if (success) {
         if (needsTwoFactor) {
           console.log("Redirecting to 2FA");
-          navigate('/admin/two-factor');
+          navigate('/admin/two-factor', { replace: true });
         } else {
-          console.log("Redirecting to admin dashboard");
-          navigate('/admin');
+          const from = location.state?.from || '/admin';
+          console.log("Redirecting to:", from);
+          navigate(from, { replace: true });
         }
       } else {
         console.log("Authentication failed");

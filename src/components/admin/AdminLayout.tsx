@@ -47,7 +47,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
   };
 
   return (
@@ -56,7 +55,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       <div className="bg-background border-b sticky top-0 z-10">
         <div className="container py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Link to="/admin" className="text-xl font-bold text-gradient">Admin Dashboard</Link>
+            <h1 className="text-xl font-bold text-gradient">Admin Dashboard</h1>
             <Button 
               variant="outline" 
               size="sm"

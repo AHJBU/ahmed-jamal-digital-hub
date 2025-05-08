@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -19,7 +19,7 @@ const formSchema = z.object({
 });
 
 const AdminLogin: React.FC = () => {
-  const { login, isLoading, needsTwoFactor } = useAuth();
+  const { login, isLoading, isAuthenticated, needsTwoFactor } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -31,17 +31,30 @@ const AdminLogin: React.FC = () => {
     },
   });
 
+  useEffect(() => {
+    // If user is already authenticated, redirect to admin dashboard
+    if (isAuthenticated && !isLoading && !needsTwoFactor) {
+      navigate('/admin');
+    } else if (needsTwoFactor && !isLoading) {
+      navigate('/admin/two-factor');
+    }
+  }, [isAuthenticated, isLoading, needsTwoFactor, navigate]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("Login attempt with", values);
     setIsSubmitting(true);
     try {
       const success = await login(values.email, values.password);
       if (success) {
         if (needsTwoFactor) {
+          console.log("Redirecting to 2FA");
           navigate('/admin/two-factor');
         } else {
+          console.log("Redirecting to admin dashboard");
           navigate('/admin');
         }
       } else {
+        console.log("Authentication failed");
         toast({
           variant: "destructive",
           title: "Authentication failed",

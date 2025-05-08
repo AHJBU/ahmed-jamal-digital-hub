@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
 
 interface UserData {
   id: string;
@@ -62,10 +63,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(userData);
           setIsAuthenticated(!pendingTwoFactor);
           setNeedsTwoFactor(pendingTwoFactor);
-          
-          if (pendingTwoFactor) {
-            navigate('/admin/two-factor');
-          }
         }
       } catch (error) {
         console.error('Authentication error:', error);
@@ -79,11 +76,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
     
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      console.log("Login attempt for:", email);
       // This is a mock authentication for demo purposes
       // In a real app, this would be an API call to your backend
       
@@ -110,20 +108,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setNeedsTwoFactor(true);
           setIsAuthenticated(false);
           localStorage.setItem('auth_pending_2fa', 'true');
-          navigate('/admin/two-factor');
+          console.log("2FA is enabled, redirecting to verification page");
+          return true;
         } else {
           setIsAuthenticated(true);
           setNeedsTwoFactor(false);
           localStorage.removeItem('auth_pending_2fa');
-          navigate('/admin');
+          console.log("Authentication successful, user authenticated");
+          toast({
+            title: "Login successful",
+            description: "Welcome to the admin dashboard",
+          });
+          return true;
         }
-        
-        return true;
       }
       
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "Invalid username/email or password",
+      });
+      console.log("Authentication failed: invalid credentials");
       return false;
     } catch (error) {
       console.error('Login error:', error);
+      toast({
+        variant: "destructive",
+        title: "Login error",
+        description: "An unexpected error occurred during login",
+      });
       return false;
     } finally {
       setIsLoading(false);
@@ -146,13 +159,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsAuthenticated(true);
         setNeedsTwoFactor(false);
         localStorage.removeItem('auth_pending_2fa');
-        navigate('/admin');
+        console.log("2FA verification successful");
+        toast({
+          title: "Verification successful",
+          description: "Two-factor authentication verified successfully",
+        });
         return true;
       }
       
+      console.log("2FA verification failed: invalid code");
+      toast({
+        variant: "destructive",
+        title: "Verification failed",
+        description: "The verification code is incorrect",
+      });
       return false;
     } catch (error) {
       console.error('2FA verification error:', error);
+      toast({
+        variant: "destructive",
+        title: "Verification error",
+        description: "An unexpected error occurred during verification",
+      });
       return false;
     } finally {
       setIsLoading(false);
@@ -166,6 +194,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('auth_user');
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_pending_2fa');
+    console.log("User logged out");
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+    });
     navigate('/admin/login');
   };
 
@@ -182,6 +215,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const updatedUser = { ...user, twoFactorEnabled: enabled };
       setUser(updatedUser);
       localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      toast({
+        title: enabled ? "Two-factor authentication enabled" : "Two-factor authentication disabled",
+        description: enabled ? 
+          "Your account is now more secure with 2FA" : 
+          "Two-factor authentication has been disabled",
+      });
     }
   };
 

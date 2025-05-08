@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -11,6 +11,11 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading, needsTwoFactor } = useAuth();
   const location = useLocation();
+  
+  useEffect(() => {
+    // Debug logging to help troubleshoot auth issues
+    console.log("Protected Route Auth State:", { isAuthenticated, isLoading, needsTwoFactor, path: location.pathname });
+  }, [isAuthenticated, isLoading, needsTwoFactor, location.pathname]);
   
   if (isLoading) {
     return (
@@ -25,14 +30,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   
   // If 2FA is required, redirect to the 2FA page
   if (needsTwoFactor) {
+    console.log("2FA required, redirecting to verification page");
     return <Navigate to="/admin/two-factor" state={{ from: location.pathname }} replace />;
   }
   
   if (!isAuthenticated) {
     // Redirect to login page but save the location they were trying to access
+    console.log("Not authenticated, redirecting to login page");
     return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
   }
   
+  console.log("User authenticated, rendering protected content");
   return <>{children}</>;
 };
 

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,6 +14,13 @@ const AdminTwoFactor: React.FC = () => {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check if we're in the 2FA flow when component mounts
+  useEffect(() => {
+    if (!needsTwoFactor && !isLoading) {
+      navigate('/admin/login');
+    }
+  }, [needsTwoFactor, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,10 +51,15 @@ const AdminTwoFactor: React.FC = () => {
     }
   };
 
-  // Redirect if not in 2FA flow
-  if (!needsTwoFactor && !isLoading) {
-    navigate('/admin/login');
-    return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="mt-2">Loading authentication state...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -70,7 +82,7 @@ const AdminTwoFactor: React.FC = () => {
                   render={({ slots }) => (
                     <InputOTPGroup>
                       {slots.map((slot, index) => (
-                        <InputOTPSlot key={index} {...slot} index={index} />
+                        <InputOTPSlot key={index} {...slot} />
                       ))}
                     </InputOTPGroup>
                   )}

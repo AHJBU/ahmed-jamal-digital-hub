@@ -10,14 +10,28 @@ import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Save, AlertTriangle } from 'lucide-react';
+import { Save, AlertTriangle, Upload } from 'lucide-react';
 import ScrollReveal from '@/components/ui/scroll-reveal';
+import EnhancedFileUpload from '@/components/admin/EnhancedFileUpload';
 
 const AdminSettings: React.FC = () => {
   const { user, toggleTwoFactor } = useAuth();
   
+  // Contact settings
   const [contactEmail, setContactEmail] = useState('contact@ahmedjamal.com');
+  
+  // Security settings
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(user?.twoFactorEnabled || false);
+  
+  // Site settings
+  const [siteName, setSiteName] = useState('Ahmed Jamal - Portfolio & Blog');
+  const [siteDescription, setSiteDescription] = useState('Personal portfolio and blog showcasing my work and thoughts.');
+  const [siteAuthor, setSiteAuthor] = useState('Ahmed Jamal');
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [favicon, setFavicon] = useState('/favicon.ico');
+  const [siteLanguage, setSiteLanguage] = useState('en');
+  const [siteTheme, setSiteTheme] = useState('light');
+  const [logoUrl, setLogoUrl] = useState('');
   
   const handleToggleTwoFactor = (checked: boolean) => {
     setTwoFactorEnabled(checked);
@@ -43,46 +57,186 @@ const AdminSettings: React.FC = () => {
     });
   };
 
+  const handleSaveSiteSettings = () => {
+    // In a real application, this would save to database or config file
+    toast({
+      title: "Site Settings Saved",
+      description: "Your site settings have been updated successfully.",
+    });
+
+    // In a real application, you would update the document title here
+    document.title = siteName;
+  };
+
+  const handleLogoSuccess = (url: string) => {
+    setLogoUrl(url);
+    toast({
+      title: "Logo Uploaded",
+      description: "Your logo has been uploaded successfully.",
+    });
+  };
+
+  const handleFaviconSuccess = (url: string) => {
+    setFavicon(url);
+    toast({
+      title: "Favicon Uploaded",
+      description: "Your favicon has been uploaded successfully.",
+    });
+  };
+
   return (
     <AdminLayout title="Settings">
-      <Tabs defaultValue="general">
+      <Tabs defaultValue="site">
         <ScrollReveal>
           <TabsList className="mb-6">
-            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="site">Site Settings</TabsTrigger>
             <TabsTrigger value="contact">Contact</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="email">Email Notifications</TabsTrigger>
           </TabsList>
         </ScrollReveal>
         
-        {/* General Settings */}
-        <TabsContent value="general">
+        {/* Site Settings */}
+        <TabsContent value="site">
           <ScrollReveal>
             <Card>
               <CardHeader>
-                <CardTitle>General Settings</CardTitle>
+                <CardTitle>Site Settings</CardTitle>
                 <CardDescription>
                   Configure basic website settings
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="siteName">Site Name</Label>
-                  <Input id="siteName" defaultValue="Ahmed Jamal - Portfolio & Blog" />
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="siteName">Site Name</Label>
+                    <Input 
+                      id="siteName" 
+                      value={siteName}
+                      onChange={(e) => setSiteName(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      This will appear in browser tabs and in search results
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="siteAuthor">Site Author</Label>
+                    <Input 
+                      id="siteAuthor" 
+                      value={siteAuthor}
+                      onChange={(e) => setSiteAuthor(e.target.value)}
+                    />
+                  </div>
                 </div>
+                
                 <div>
                   <Label htmlFor="siteDescription">Site Description</Label>
-                  <Input id="siteDescription" defaultValue="Personal portfolio and blog showcasing my work and thoughts." />
+                  <Input 
+                    id="siteDescription" 
+                    value={siteDescription}
+                    onChange={(e) => setSiteDescription(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Brief description of your site for SEO purposes (appears in search results)
+                  </p>
                 </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div>
+                    <Label>Site Logo</Label>
+                    <div className="mt-2">
+                      <EnhancedFileUpload
+                        endpoint="/api/uploads/site"
+                        onSuccess={handleLogoSuccess}
+                        accept="image/*"
+                        maxSize={2}
+                        label="Upload Logo"
+                        category="site"
+                        allowDescription={false}
+                      />
+                    </div>
+                    {logoUrl && (
+                      <div className="mt-2 p-2 border rounded">
+                        <img 
+                          src={logoUrl} 
+                          alt="Site Logo" 
+                          className="h-12 object-contain"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label>Favicon</Label>
+                    <div className="mt-2">
+                      <EnhancedFileUpload
+                        endpoint="/api/uploads/site"
+                        onSuccess={handleFaviconSuccess}
+                        accept="image/*"
+                        maxSize={1}
+                        label="Upload Favicon"
+                        category="favicon"
+                        allowDescription={false}
+                      />
+                    </div>
+                    {favicon && favicon !== '/favicon.ico' && (
+                      <div className="mt-2 p-2 border rounded">
+                        <img 
+                          src={favicon} 
+                          alt="Favicon" 
+                          className="h-8 object-contain"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Recommended size: 32x32 pixels (PNG format)
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="siteLanguage">Default Language</Label>
+                    <select
+                      id="siteLanguage"
+                      value={siteLanguage}
+                      onChange={(e) => setSiteLanguage(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="en">English</option>
+                      <option value="ar">Arabic</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="siteTheme">Default Theme</Label>
+                    <select
+                      id="siteTheme"
+                      value={siteTheme}
+                      onChange={(e) => setSiteTheme(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                      <option value="system">System (User's Preference)</option>
+                    </select>
+                  </div>
+                </div>
+                
                 <div className="flex items-center space-x-2">
-                  <Switch id="maintenance" />
+                  <Switch 
+                    id="maintenance"
+                    checked={maintenanceMode}
+                    onCheckedChange={setMaintenanceMode}
+                  />
                   <Label htmlFor="maintenance">Maintenance Mode</Label>
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline">Reset to Defaults</Button>
+                <Button onClick={handleSaveSiteSettings}>
                   <Save className="mr-2 h-4 w-4" />
-                  Save Changes
+                  Save Site Settings
                 </Button>
               </CardFooter>
             </Card>

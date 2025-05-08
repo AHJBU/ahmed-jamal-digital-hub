@@ -22,6 +22,11 @@ interface EnhancedFileUploadProps {
   category: string;
   allowTags?: boolean;
   allowDescription?: boolean;
+  // For backward compatibility with the old interface
+  onFileSelected?: (file: File) => void;
+  initialPreview?: string;
+  previewType?: string;
+  maxSizeMB?: number;
 }
 
 const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
@@ -30,15 +35,22 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
   onError,
   accept = "image/*",
   maxSize = 5, // default 5MB
+  maxSizeMB, // backward compatibility
   label = "Upload File",
   allowMultiple = false,
   className = "",
   category,
   allowTags = false,
-  allowDescription = false
+  allowDescription = false,
+  onFileSelected, // backward compatibility
+  initialPreview, // backward compatibility
+  previewType // backward compatibility
 }) => {
+  // Use maxSizeMB for backward compatibility if provided
+  const effectiveMaxSize = maxSizeMB || maxSize;
+  
   const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(initialPreview || null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -56,6 +68,12 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
     setError(null);
     setPreview(null);
     setUploadComplete(false);
+    
+    // Support the legacy onFileSelected callback
+    if (onFileSelected) {
+      onFileSelected(file);
+      return;
+    }
     
     // Create preview for images
     if (file.type.startsWith('image/')) {
@@ -91,7 +109,7 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
         description: description || undefined,
         tags: tags.length > 0 ? tags : undefined,
         allowedTypes: allowedTypes[0] === '*/*' ? undefined : allowedTypes,
-        maxSize
+        maxSize: effectiveMaxSize
       });
       
       // Clear progress simulation
@@ -171,7 +189,7 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
         <img 
           src={preview} 
           alt="Preview" 
-          className="rounded-md max-h-40 object-contain" 
+          className={`rounded-md object-contain ${previewType === 'large' ? 'max-h-60' : 'max-h-40'}`}
         />
         {!isUploading && (
           <button 
@@ -200,7 +218,7 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
               Click or drag file to upload
             </span>
             <span className="text-xs text-muted-foreground mt-1">
-              Maximum file size: {maxSize}MB
+              Maximum file size: {effectiveMaxSize}MB
             </span>
           </label>
         </Card>
@@ -263,58 +281,63 @@ const EnhancedFileUpload: React.FC<EnhancedFileUploadProps> = ({
             </div>
           )}
           
-          {isUploading && (
-            <div className="mt-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${progress}%` }}
-                  ></div>
+          {/* If using the legacy onFileSelected, don't show upload controls */}
+          {!onFileSelected && (
+            <>
+              {isUploading && (
+                <div className="mt-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{progress}%</span>
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground">{progress}%</span>
+              )}
+              
+              {uploadComplete && (
+                <div className="flex items-center mt-4 text-sm text-green-600">
+                  <Check className="h-4 w-4 mr-1" />
+                  Upload complete
+                </div>
+              )}
+              
+              {error && (
+                <div className="text-sm text-destructive mt-4">{error}</div>
+              )}
+              
+              <div className="mt-4 flex justify-end gap-2">
+                {!uploadComplete && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handleReset}
+                    disabled={isUploading}
+                  >
+                    Cancel
+                  </Button>
+                )}
+                
+                {!isUploading && !uploadComplete ? (
+                  <Button 
+                    onClick={handleUpload}
+                    disabled={!preview}
+                  >
+                    Upload
+                  </Button>
+                ) : uploadComplete ? (
+                  <Button 
+                    variant="outline"
+                    onClick={handleReset}
+                  >
+                    Upload Another
+                  </Button>
+                ) : null}
               </div>
-            </div>
+            </>
           )}
-          
-          {uploadComplete && (
-            <div className="flex items-center mt-4 text-sm text-green-600">
-              <Check className="h-4 w-4 mr-1" />
-              Upload complete
-            </div>
-          )}
-          
-          {error && (
-            <div className="text-sm text-destructive mt-4">{error}</div>
-          )}
-          
-          <div className="mt-4 flex justify-end gap-2">
-            {!uploadComplete && (
-              <Button 
-                variant="outline" 
-                onClick={handleReset}
-                disabled={isUploading}
-              >
-                Cancel
-              </Button>
-            )}
-            
-            {!isUploading && !uploadComplete ? (
-              <Button 
-                onClick={handleUpload}
-                disabled={!preview}
-              >
-                Upload
-              </Button>
-            ) : uploadComplete ? (
-              <Button 
-                variant="outline"
-                onClick={handleReset}
-              >
-                Upload Another
-              </Button>
-            ) : null}
-          </div>
         </>
       )}
       

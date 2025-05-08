@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +26,6 @@ import {
   AlignCenter, 
   AlignRight,
   Save,
-  LinkIcon
 } from 'lucide-react';
 
 interface BlogPostEditorProps {
@@ -241,34 +239,20 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({ post, onSave }) => {
     });
   };
 
-  const handleFeaturedImageSelected = (file: File) => {
-    // In a real app, this would upload to your server and return a URL
-    // For demo, we're creating a data URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setFeaturedImage(e.target.result as string);
-        toast({
-          title: "Image Uploaded",
-          description: "Featured image has been successfully uploaded."
-        });
-      }
-    };
-    reader.readAsDataURL(file);
+  const handleFeaturedImageSuccess = (url: string, metadata: any) => {
+    setFeaturedImage(url);
+    toast({
+      title: "Image Uploaded",
+      description: "Featured image has been successfully uploaded."
+    });
   };
   
-  const handleAuthorAvatarSelected = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setAuthorAvatar(e.target.result as string);
-        toast({
-          title: "Avatar Uploaded",
-          description: "Author avatar has been successfully uploaded."
-        });
-      }
-    };
-    reader.readAsDataURL(file);
+  const handleAuthorAvatarSuccess = (url: string, metadata: any) => {
+    setAuthorAvatar(url);
+    toast({
+      title: "Avatar Uploaded",
+      description: "Author avatar has been successfully uploaded."
+    });
   };
 
   return (
@@ -479,11 +463,14 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({ post, onSave }) => {
                   <Label htmlFor="featuredImage">Featured Image</Label>
                   <div className="mt-2">
                     <EnhancedFileUpload
-                      onFileSelected={handleFeaturedImageSelected}
-                      initialPreview={featuredImage}
+                      endpoint="/api/uploads/blog"
+                      onSuccess={handleFeaturedImageSuccess}
                       accept="image/*"
-                      maxSizeMB={5}
-                      previewType="large"
+                      maxSize={5}
+                      label="Upload Featured Image"
+                      category="blog"
+                      allowDescription={true}
+                      allowTags={true}
                     />
                   </div>
                 </div>
@@ -538,11 +525,12 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({ post, onSave }) => {
               <Label htmlFor="authorAvatar">Author Avatar</Label>
               <div className="mt-2">
                 <EnhancedFileUpload
-                  onFileSelected={handleAuthorAvatarSelected}
-                  initialPreview={authorAvatar}
+                  endpoint="/api/uploads/avatars"
+                  onSuccess={handleAuthorAvatarSuccess}
                   accept="image/*"
-                  maxSizeMB={2}
-                  previewType="small"
+                  maxSize={2}
+                  label="Upload Author Avatar"
+                  category="avatars"
                 />
               </div>
             </div>

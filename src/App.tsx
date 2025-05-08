@@ -83,18 +83,18 @@ const App = () => (
               <Route path="/admin/two-factor" element={<AdminTwoFactor />} />
 
               {/* Protected Admin Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/profile" element={<AdminProfile />} />
-              <Route path="/admin/applications" element={<AdminApplications />} />
-              <Route path="/admin/training" element={<AdminTraining />} />
-              <Route path="/admin/blog" element={<AdminBlog />} />
-              <Route path="/admin/achievements" element={<AdminAchievements />} />
-              <Route path="/admin/literature" element={<AdminLiterature />} />
-              <Route path="/admin/about" element={<AdminAbout />} />
-              <Route path="/admin/press" element={<AdminPress />} />
-              <Route path="/admin/resources" element={<AdminResources />} />
-              <Route path="/admin/backup" element={<AdminBackup />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/profile" element={<ProtectedRoute><AdminProfile /></ProtectedRoute>} />
+              <Route path="/admin/applications" element={<ProtectedRoute><AdminApplications /></ProtectedRoute>} />
+              <Route path="/admin/training" element={<ProtectedRoute><AdminTraining /></ProtectedRoute>} />
+              <Route path="/admin/blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />
+              <Route path="/admin/achievements" element={<ProtectedRoute><AdminAchievements /></ProtectedRoute>} />
+              <Route path="/admin/literature" element={<ProtectedRoute><AdminLiterature /></ProtectedRoute>} />
+              <Route path="/admin/about" element={<ProtectedRoute><AdminAbout /></ProtectedRoute>} />
+              <Route path="/admin/press" element={<ProtectedRoute><AdminPress /></ProtectedRoute>} />
+              <Route path="/admin/resources" element={<ProtectedRoute><AdminResources /></ProtectedRoute>} />
+              <Route path="/admin/backup" element={<ProtectedRoute><AdminBackup /></ProtectedRoute>} />
+              <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               
               {/* 404 Route */}
               <Route path="*" element={<NotFound />} />

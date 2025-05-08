@@ -142,7 +142,7 @@ const AdminSettings: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <Alert variant="warning" className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900">
+                <Alert className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Important Security Notice</AlertTitle>
                   <AlertDescription>

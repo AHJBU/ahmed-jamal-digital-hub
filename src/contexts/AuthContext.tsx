@@ -14,8 +14,10 @@ interface AuthContextType {
   user: UserData | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  needsTwoFactor: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   verify2FA: (code: string) => Promise<boolean>;
+  verifyTwoFactor: (code: string) => Promise<boolean>;
   logout: () => void;
   updateUser: (userData: Partial<UserData>) => void;
   toggleTwoFactor: (enabled: boolean) => void;
@@ -39,6 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [needsTwoFactor, setNeedsTwoFactor] = useState<boolean>(false);
   const navigate = useNavigate();
 
   // For demo purposes, these would normally be environment variables or securely stored
@@ -52,24 +55,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const storedUser = localStorage.getItem('auth_user');
         const storedToken = localStorage.getItem('auth_token');
+        const pendingTwoFactor = localStorage.getItem('auth_pending_2fa') === 'true';
         
         if (storedUser && storedToken) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
-          setIsAuthenticated(true);
+          setIsAuthenticated(!pendingTwoFactor);
+          setNeedsTwoFactor(pendingTwoFactor);
+          
+          if (pendingTwoFactor) {
+            navigate('/admin/two-factor');
+          }
         }
       } catch (error) {
         console.error('Authentication error:', error);
         // Clear potentially corrupt storage
         localStorage.removeItem('auth_user');
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_pending_2fa');
       } finally {
         setIsLoading(false);
       }
     };
     
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
@@ -94,16 +104,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('auth_token', 'mock_jwt_token');
         
         setUser(mockUser);
-        setIsAuthenticated(true);
         
-        // Redirect based on 2FA status
+        // Check if 2FA is enabled
         if (mockUser.twoFactorEnabled) {
+          setNeedsTwoFactor(true);
+          setIsAuthenticated(false);
+          localStorage.setItem('auth_pending_2fa', 'true');
           navigate('/admin/two-factor');
-          return true;
         } else {
+          setIsAuthenticated(true);
+          setNeedsTwoFactor(false);
+          localStorage.removeItem('auth_pending_2fa');
           navigate('/admin');
-          return true;
         }
+        
+        return true;
       }
       
       return false;
@@ -116,6 +131,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const verify2FA = async (code: string): Promise<boolean> => {
+    return verifyTwoFactor(code);
+  };
+
+  const verifyTwoFactor = async (code: string): Promise<boolean> => {
     setIsLoading(true);
     try {
       // Mock 2FA verification
@@ -124,6 +143,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // For demo purposes, any 6-digit code is accepted
       if (/^\d{6}$/.test(code)) {
         // Successfully verified
+        setIsAuthenticated(true);
+        setNeedsTwoFactor(false);
+        localStorage.removeItem('auth_pending_2fa');
         navigate('/admin');
         return true;
       }
@@ -140,8 +162,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    setNeedsTwoFactor(false);
     localStorage.removeItem('auth_user');
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_pending_2fa');
     navigate('/admin/login');
   };
 
@@ -165,8 +189,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isLoading,
     isAuthenticated,
+    needsTwoFactor,
     login,
     verify2FA,
+    verifyTwoFactor,
     logout,
     updateUser,
     toggleTwoFactor

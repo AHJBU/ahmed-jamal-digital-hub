@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
-import { FileUpload } from '@/components/admin/FileUpload';
 import EnhancedFileUpload from '@/components/admin/EnhancedFileUpload';
 import { 
   Bold, 
@@ -242,20 +241,34 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({ post, onSave }) => {
     });
   };
 
-  const handleFeaturedImageUpload = (url: string) => {
-    setFeaturedImage(url);
-    toast({
-      title: "Image Uploaded",
-      description: "Featured image has been successfully uploaded."
-    });
+  const handleFeaturedImageSelected = (file: File) => {
+    // In a real app, this would upload to your server and return a URL
+    // For demo, we're creating a data URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setFeaturedImage(e.target.result as string);
+        toast({
+          title: "Image Uploaded",
+          description: "Featured image has been successfully uploaded."
+        });
+      }
+    };
+    reader.readAsDataURL(file);
   };
   
-  const handleAuthorAvatarUpload = (url: string) => {
-    setAuthorAvatar(url);
-    toast({
-      title: "Avatar Uploaded",
-      description: "Author avatar has been successfully uploaded."
-    });
+  const handleAuthorAvatarSelected = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setAuthorAvatar(e.target.result as string);
+        toast({
+          title: "Avatar Uploaded",
+          description: "Author avatar has been successfully uploaded."
+        });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -466,11 +479,11 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({ post, onSave }) => {
                   <Label htmlFor="featuredImage">Featured Image</Label>
                   <div className="mt-2">
                     <EnhancedFileUpload
-                      onFileUpload={handleFeaturedImageUpload}
-                      defaultPreview={featuredImage}
-                      acceptedFileTypes={['image/*']}
-                      maxSize={5}
-                      previewSize="large"
+                      onFileSelected={handleFeaturedImageSelected}
+                      initialPreview={featuredImage}
+                      accept="image/*"
+                      maxSizeMB={5}
+                      previewType="large"
                     />
                   </div>
                 </div>
@@ -525,11 +538,11 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({ post, onSave }) => {
               <Label htmlFor="authorAvatar">Author Avatar</Label>
               <div className="mt-2">
                 <EnhancedFileUpload
-                  onFileUpload={handleAuthorAvatarUpload}
-                  defaultPreview={authorAvatar}
-                  acceptedFileTypes={['image/*']}
-                  maxSize={2}
-                  previewSize="small"
+                  onFileSelected={handleAuthorAvatarSelected}
+                  initialPreview={authorAvatar}
+                  accept="image/*"
+                  maxSizeMB={2}
+                  previewType="small"
                 />
               </div>
             </div>

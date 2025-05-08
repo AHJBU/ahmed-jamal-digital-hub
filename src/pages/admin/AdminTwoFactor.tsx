@@ -32,6 +32,12 @@ const AdminTwoFactor: React.FC = () => {
       const success = await verifyTwoFactor(code);
       if (success) {
         navigate('/admin');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid Code",
+          description: "The verification code is incorrect. Please try again.",
+        });
       }
     } finally {
       setIsSubmitting(false);

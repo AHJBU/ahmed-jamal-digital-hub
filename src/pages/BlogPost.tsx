@@ -1,89 +1,159 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useSettings } from '@/contexts/SettingsContext';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Share2, MessageSquare, Facebook, Twitter, Linkedin } from 'lucide-react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { CalendarIcon, ArrowLeft, Tag } from 'lucide-react';
+import ShareButtons from '@/components/blog/ShareButtons';
+import AuthorProfile from '@/components/blog/AuthorProfile';
+import { Twitter, Facebook, Linkedin, Github, Instagram, Youtube } from 'lucide-react';
+import ScrollReveal from '@/components/ui/scroll-reveal';
 
-// Mock blog data (same as in Blog.tsx)
+// Mock blog posts data
 const blogPosts = [
   {
     id: 1,
     title: 'The Future of Web Development: Trends to Watch in 2025',
-    excerpt: 'Explore the upcoming trends in web development, from AI integration to enhanced user experiences and the evolution of frontend frameworks.',
     content: `
-        <p>The field of web development is constantly evolving, with new technologies and approaches emerging to address the growing demands of the digital landscape. As we look ahead to 2025, several significant trends are poised to shape the future of web development.</p>
+# The Future of Web Development: Trends to Watch in 2025
 
-        <h2>AI Integration in Web Development</h2>
-        <p>Artificial Intelligence is becoming increasingly integrated into web development workflows. From AI-assisted code generation to intelligent user interfaces that adapt to user behavior, the role of AI in web development is expanding rapidly. Developers are leveraging machine learning algorithms to create more personalized user experiences and streamline development processes.</p>
+## Introduction
 
-        <h2>The Rise of WebAssembly</h2>
-        <p>WebAssembly (WASM) is gaining momentum as a powerful tool for high-performance web applications. By allowing developers to run code written in languages like C, C++, and Rust at near-native speed in browsers, WASM is opening new possibilities for complex web applications, including games, video editing tools, and data visualization platforms.</p>
+As we move deeper into the digital age, web development continues to evolve at an unprecedented pace. New technologies emerge regularly, changing how developers build websites and web applications. This article explores the most significant web development trends to watch in 2025.
 
-        <h2>Progressive Web Apps Continue to Evolve</h2>
-        <p>Progressive Web Apps (PWAs) continue to bridge the gap between web and native applications. With improvements in offline capabilities, push notifications, and integration with device features, PWAs are becoming an increasingly attractive alternative to native mobile apps.</p>
+## 1. AI-Powered Development
 
-        <h2>The Growth of Headless CMS</h2>
-        <p>Headless CMS architectures, which separate the content management from the presentation layer, are becoming the standard for modern web development. This approach provides greater flexibility, allowing developers to use any frontend technology while managing content through a user-friendly interface.</p>
+Artificial Intelligence is no longer just a buzzword; it's becoming an integral part of web development workflows. In 2025, we expect to see:
 
-        <h2>Edge Computing for Web Applications</h2>
-        <p>Edge computing is transforming how web applications are delivered by processing data closer to the user. This approach reduces latency and improves the performance of web applications, particularly for users in regions with slower internet connections.</p>
+- **AI Code Assistants**: Tools like GitHub Copilot will become more sophisticated, generating not just snippets but entire components based on natural language descriptions.
+- **Automated Testing**: AI will revolutionize testing by automatically generating test cases and identifying potential bugs before they reach production.
+- **User Experience Optimization**: AI algorithms will analyze user behavior to make real-time suggestions for improving website performance and conversion rates.
 
-        <h2>Conclusion</h2>
-        <p>The future of web development is exciting, with technologies like AI, WebAssembly, and edge computing poised to transform how we build and experience the web. By staying informed about these trends and adopting new tools and approaches, developers can create more powerful, efficient, and user-friendly web applications that meet the evolving needs of users worldwide.</p>
+## 2. Web Assembly (WASM) Goes Mainstream
+
+Web Assembly is set to revolutionize web performance:
+
+- **Near-Native Speed**: Applications running at speeds comparable to native apps.
+- **Language Diversity**: Developers can write code in languages like Rust, C++, or Go and run it in the browser.
+- **Complex Applications**: Enable more resource-intensive applications like video editing, 3D rendering, and scientific simulations to run in browsers.
+
+## 3. The Rise of Headless Architecture
+
+Headless architecture separates the front-end presentation layer from the back-end logic:
+
+- **Content Delivery Flexibility**: Deliver content to any device or platform.
+- **Developer Experience**: Front-end developers can work with their preferred frameworks and tools.
+- **Performance Optimization**: Serve optimized content for each channel or device.
+
+## 4. Progressive Web Apps (PWAs) Become Standard
+
+PWAs have been around for a while, but they'll become the standard approach for web applications:
+
+- **Offline Functionality**: Enhanced capabilities for offline use.
+- **Native-Like Experience**: Improved integrations with device features.
+- **Installation Without App Stores**: Direct installation from browsers becoming more seamless.
+
+## 5. Low-Code and No-Code Development
+
+As development tools become more accessible:
+
+- **Citizen Developers**: More non-technical people building web applications.
+- **Rapid Prototyping**: Professional developers using low-code tools for quick prototyping.
+- **AI Integration**: Low-code platforms leveraging AI to suggest improvements and automate repetitive tasks.
+
+## 6. Enhanced Focus on Accessibility
+
+Web accessibility will take center stage:
+
+- **Regulatory Compliance**: Stricter enforcement of accessibility standards.
+- **Built-in Accessibility Tools**: Frameworks and libraries with accessibility features by default.
+- **AI-Powered Accessibility**: Automated tools that can identify and fix accessibility issues.
+
+## 7. WebXR for Immersive Experiences
+
+Web-based extended reality (WebXR) will gain traction:
+
+- **Virtual Shopping Experiences**: Try-before-you-buy in virtual environments.
+- **3D Interactive Tutorials and Training**: Enhanced learning experiences.
+- **Virtual Collaboration**: Web-based collaborative spaces for remote teams.
+
+## Conclusion
+
+The web development landscape in 2025 promises exciting advancements that will change how developers work and how users experience the web. By keeping an eye on these trends, developers can stay ahead of the curve and build cutting-edge websites and applications that meet the evolving needs of users.
+
+Whether you're a seasoned developer or just starting your journey, embracing these technologies and approaches will be key to success in the coming years. The future of web development is bright, and the possibilities are endless.
+
+![Web Development](https://images.unsplash.com/photo-1517292987719-0369a794ec0f)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     `,
+    excerpt: 'Explore the upcoming trends in web development, from AI integration to enhanced user experiences and the evolution of frontend frameworks.',
     image: 'https://images.unsplash.com/photo-1517292987719-0369a794ec0f?q=80&w=1074&auto=format&fit=crop',
     date: '2025-04-15',
-    author: 'Ahmed Jamal',
-    authorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=1170&auto=format&fit=crop',
-    authorBio: 'Digital professional specializing in web development, design, and digital marketing strategies.',
+    author: {
+      name: 'Ahmed Jamal',
+      bio: 'Senior Web Developer and Tech Writer with over 10 years of experience in creating modern web applications and writing about emerging technologies.',
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      socialLinks: [
+        { name: 'Twitter', icon: <Twitter className="h-4 w-4" />, url: 'https://twitter.com/', id: 'twitter' },
+        { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, url: 'https://linkedin.com/', id: 'linkedin' },
+        { name: 'GitHub', icon: <Github className="h-4 w-4" />, url: 'https://github.com/', id: 'github' },
+      ]
+    },
     category: 'web-development',
     tags: ['React', 'AI', 'Web Trends', 'Frontend'],
-    comments: [
-      {
-        id: 1,
-        name: 'Sarah Johnson',
-        date: '2025-04-16',
-        content: 'Great insights on the future of web development! I\'m particularly excited about the potential of WebAssembly.',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1074&auto=format&fit=crop'
-      },
-      {
-        id: 2,
-        name: 'Michael Chen',
-        date: '2025-04-16',
-        content: 'I\'ve been experimenting with AI-assisted development tools, and they\'ve significantly improved my workflow. Excited to see how this field evolves.',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=1170&auto=format&fit=crop'
-      }
-    ]
+    relatedPosts: [2, 4, 5]
   },
-  // Other blog posts would be defined here
+  // ... other blog posts data
 ];
 
-const BlogPost: React.FC = () => {
+const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
-  const { translations, language } = useSettings();
-  const t = translations.blog;
-  
-  const post = blogPosts.find(p => p.id === Number(id));
-  
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentUrl, setCurrentUrl] = useState('');
+
+  useEffect(() => {
+    // In a real app, fetch the post by ID
+    const postId = parseInt(id || '1');
+    const foundPost = blogPosts.find(p => p.id === postId);
+    
+    if (foundPost) {
+      setPost(foundPost);
+      document.title = foundPost.title;
+    }
+    
+    setLoading(false);
+    setCurrentUrl(window.location.href);
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-12 px-4">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-secondary rounded w-3/4"></div>
+            <div className="h-4 bg-secondary rounded w-1/2"></div>
+            <div className="h-96 bg-secondary rounded"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!post) {
     return (
       <Layout>
-        <div className="container py-12 text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            {language === 'ar' ? 'المقال غير موجود' : 'Article Not Found'}
-          </h1>
+        <div className="container mx-auto py-12 px-4 text-center">
+          <h1 className="text-3xl font-bold mb-4">Blog Post Not Found</h1>
+          <p className="mb-8">The blog post you're looking for doesn't exist or has been removed.</p>
           <Link to="/blog">
             <Button>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              {language === 'ar' ? 'العودة إلى المدونة' : 'Back to Blog'}
+              Back to Blog
             </Button>
           </Link>
         </div>
@@ -91,198 +161,180 @@ const BlogPost: React.FC = () => {
     );
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return language === 'ar' 
-      ? `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}` 
-      : new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  // Function to convert markdown-like content to HTML
+  const renderContent = () => {
+    let content = post.content;
+    
+    // Basic markdown-like transformations
+    // Headers
+    content = content.replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold my-4">$1</h1>');
+    content = content.replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold my-4">$1</h2>');
+    content = content.replace(/^### (.+)$/gm, '<h3 class="text-xl font-bold my-3">$1</h3>');
+    
+    // Bold and italic
+    content = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    content = content.replace(/\_(.+?)\_/g, '<em>$1</em>');
+    
+    // Lists
+    content = content.replace(/^- (.+)$/gm, '<li>$1</li>');
+    content = content.replace(/(<li>.+<\/li>\n)+/g, '<ul class="list-disc ml-6 my-4">$&</ul>');
+    
+    // Images
+    content = content.replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" class="my-6 rounded-lg w-full">');
+    
+    // Links
+    content = content.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary hover:underline">$1</a>');
+    
+    // Paragraphs
+    content = content.replace(/^(?!<[h|u|l|i|p])(.+)$/gm, '<p class="my-4">$1</p>');
+    
+    // Return as HTML
+    return { __html: content };
   };
 
-  const handleSubmitComment = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    toast({
-      title: language === 'ar' ? "تم إرسال التعليق بنجاح" : "Comment submitted successfully",
-      description: language === 'ar' 
-        ? "سيتم مراجعة تعليقك قبل النشر" 
-        : "Your comment will be reviewed before publishing",
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
     });
   };
 
+  // Find related posts
+  const relatedPosts = post.relatedPosts?.map((id: number) => {
+    return blogPosts.find(p => p.id === id);
+  }).filter(Boolean) || [];
+
   return (
     <Layout>
-      <div className="container py-12">
-        {/* Back Navigation */}
-        <div className="mb-6">
-          <Link to="/blog">
-            <Button variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {language === 'ar' ? 'العودة إلى المدونة' : 'Back to Blog'}
-            </Button>
-          </Link>
-        </div>
-        
-        {/* Article Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center">
-              <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
-              <span className="text-sm text-muted-foreground">{formatDate(post.date)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {post.tags.map((tag, index) => (
-                <Badge key={index} variant="outline">{tag}</Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        {/* Featured Image */}
-        <div className="mb-8">
-          <div className="aspect-video w-full overflow-hidden rounded-lg">
-            <img 
-              src={post.image} 
-              alt={post.title}
-              className="w-full h-full object-cover" 
-            />
-          </div>
-        </div>
-        
-        {/* Article Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
-            <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
-            
-            {/* Share Buttons */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-3">{t.share}</h3>
-              <div className="flex gap-3">
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Facebook className="h-4 w-4" />
-                  <span className="sr-only">Share on Facebook</span>
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Twitter className="h-4 w-4" />
-                  <span className="sr-only">Share on Twitter</span>
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Linkedin className="h-4 w-4" />
-                  <span className="sr-only">Share on LinkedIn</span>
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <Share2 className="h-4 w-4" />
-                  <span className="sr-only">Share</span>
-                </Button>
-              </div>
-            </div>
-            
-            {/* Author */}
-            <div className="mt-8 p-6 border rounded-lg bg-secondary/30">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={post.authorAvatar} alt={post.author} />
-                  <AvatarFallback>{post.author.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{post.author}</h3>
-                  <p className="text-sm text-muted-foreground">{post.authorBio}</p>
+      <article className="container mx-auto py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <ScrollReveal>
+            <Link to="/blog" className="inline-flex items-center text-muted-foreground hover:text-primary mb-6">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Blog
+            </Link>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.1}>
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+              <div className="flex flex-wrap items-center gap-3 text-muted-foreground mb-4">
+                <div className="flex items-center">
+                  <CalendarIcon className="h-4 w-4 mr-1" />
+                  <span>{formatDate(post.date)}</span>
+                </div>
+                <div className="flex items-center">
+                  <Tag className="h-4 w-4 mr-1" />
+                  <span>{post.category.replace('-', ' ')}</span>
                 </div>
               </div>
             </div>
-            
-            {/* Comments */}
-            <div className="mt-12">
-              <h3 className="text-2xl font-bold mb-6">
-                {t.comments} ({post.comments.length})
-              </h3>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.2}>
+            <div className="relative aspect-[16/9] rounded-lg overflow-hidden mb-8">
+              <img 
+                src={post.image} 
+                alt={post.title} 
+                className="object-cover w-full h-full"
+              />
+            </div>
+          </ScrollReveal>
+          
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {/* Main Content */}
+            <ScrollReveal delay={0.3} className="md:col-span-8">
+              <div className="prose dark:prose-invert max-w-none">
+                <div dangerouslySetInnerHTML={renderContent()} />
+              </div>
               
-              <div className="space-y-6">
-                {post.comments.map(comment => (
-                  <Card key={comment.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <Avatar>
-                          <AvatarImage src={comment.avatar} alt={comment.name} />
-                          <AvatarFallback>{comment.name.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-center mb-2">
-                            <h4 className="font-semibold">{comment.name}</h4>
-                            <span className="text-sm text-muted-foreground">{formatDate(comment.date)}</span>
-                          </div>
-                          <p>{comment.content}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="flex flex-wrap gap-2 my-8">
+                {post.tags.map((tag: string, index: number) => (
+                  <Badge key={index} variant="secondary">
+                    {tag}
+                  </Badge>
                 ))}
               </div>
               
-              {/* Comment Form */}
-              <form onSubmit={handleSubmitComment} className="mt-8">
-                <h3 className="text-xl font-semibold mb-4">{t.leaveComment}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-1">
-                      {language === 'ar' ? 'الاسم' : 'Name'}
-                    </label>
-                    <Input id="name" required />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-1">
-                      {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-                    </label>
-                    <Input id="email" type="email" required />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="comment" className="block text-sm font-medium mb-1">
-                    {language === 'ar' ? 'التعليق' : 'Comment'}
-                  </label>
-                  <Textarea id="comment" rows={5} required />
-                </div>
-                <Button type="submit" className="w-full md:w-auto">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  {language === 'ar' ? 'إرسال التعليق' : 'Submit Comment'}
-                </Button>
-              </form>
-            </div>
-          </div>
-          
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-8">
-            {/* Related Posts */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">
-                  {language === 'ar' ? 'مقالات ذات صلة' : 'Related Posts'}
-                </h3>
-                <div className="space-y-4">
-                  {blogPosts.filter(p => p.id !== post.id).slice(0, 3).map(relatedPost => (
-                    <div key={relatedPost.id} className="flex gap-3">
-                      <div className="w-16 h-16 flex-shrink-0">
-                        <img 
-                          src={relatedPost.image}
-                          alt={relatedPost.title}
-                          className="w-full h-full object-cover rounded"
-                        />
+              {/* Share buttons */}
+              <div className="my-8">
+                <h3 className="text-lg font-medium mb-2">Share this article</h3>
+                <ShareButtons title={post.title} url={currentUrl} showLabel={true} />
+              </div>
+              
+              <Separator />
+              
+              {/* Author Info */}
+              <div className="my-8">
+                <AuthorProfile 
+                  name={post.author.name} 
+                  bio={post.author.bio} 
+                  avatar={post.author.avatar}
+                  socialLinks={post.author.socialLinks}
+                />
+              </div>
+            </ScrollReveal>
+            
+            {/* Sidebar */}
+            <ScrollReveal delay={0.4} className="md:col-span-4">
+              <div className="space-y-8 sticky top-24">
+                {/* Table of Contents */}
+                <Card>
+                  <CardContent className="p-4">
+                    <h3 className="font-medium mb-2">Table of Contents</h3>
+                    <ScrollArea className="h-56">
+                      <nav className="space-y-1">
+                        <a href="#introduction" className="block text-sm py-1 hover:text-primary">Introduction</a>
+                        <a href="#ai-powered-development" className="block text-sm py-1 hover:text-primary">1. AI-Powered Development</a>
+                        <a href="#web-assembly" className="block text-sm py-1 hover:text-primary">2. Web Assembly Goes Mainstream</a>
+                        <a href="#headless-architecture" className="block text-sm py-1 hover:text-primary">3. The Rise of Headless Architecture</a>
+                        <a href="#pwas" className="block text-sm py-1 hover:text-primary">4. Progressive Web Apps Become Standard</a>
+                        <a href="#low-code" className="block text-sm py-1 hover:text-primary">5. Low-Code and No-Code Development</a>
+                        <a href="#accessibility" className="block text-sm py-1 hover:text-primary">6. Enhanced Focus on Accessibility</a>
+                        <a href="#webxr" className="block text-sm py-1 hover:text-primary">7. WebXR for Immersive Experiences</a>
+                        <a href="#conclusion" className="block text-sm py-1 hover:text-primary">Conclusion</a>
+                      </nav>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+                
+                {/* Related Articles */}
+                {relatedPosts.length > 0 && (
+                  <Card>
+                    <CardContent className="p-4">
+                      <h3 className="font-medium mb-3">Related Articles</h3>
+                      <div className="space-y-4">
+                        {relatedPosts.map((relatedPost: any) => (
+                          <Link key={relatedPost.id} to={`/blog/${relatedPost.id}`} className="block group">
+                            <div className="flex gap-3">
+                              <div className="w-16 h-16 overflow-hidden rounded flex-shrink-0">
+                                <img 
+                                  src={relatedPost.image} 
+                                  alt={relatedPost.title}
+                                  className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                                />
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-sm group-hover:text-primary line-clamp-2">
+                                  {relatedPost.title}
+                                </h4>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {formatDate(relatedPost.date)}
+                                </p>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
                       </div>
-                      <div>
-                        <Link to={`/blog/${relatedPost.id}`}>
-                          <h4 className="font-medium line-clamp-2 hover:text-primary transition-colors">
-                            {relatedPost.title}
-                          </h4>
-                        </Link>
-                        <p className="text-sm text-muted-foreground">{formatDate(relatedPost.date)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </ScrollReveal>
           </div>
         </div>
-      </div>
+      </article>
     </Layout>
   );
 };

@@ -11,10 +11,11 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 import ScrollReveal from '@/components/ui/scroll-reveal';
+import { toast } from '@/components/ui/use-toast';
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  email: z.string().min(1, { message: "Please enter your email or username" }),
+  password: z.string().min(1, { message: "Please enter your password" }),
 });
 
 const AdminLogin: React.FC = () => {
@@ -40,6 +41,12 @@ const AdminLogin: React.FC = () => {
         } else {
           navigate('/admin');
         }
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Authentication failed",
+          description: "Invalid username/email or password.",
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -64,9 +71,9 @@ const AdminLogin: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email or Username</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin@example.com" {...field} />
+                        <Input placeholder="admin@example.com or admin" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -98,7 +105,7 @@ const AdminLogin: React.FC = () => {
           </CardContent>
           <CardFooter className="flex flex-col">
             <p className="text-sm text-muted-foreground text-center mt-2">
-              For demo purposes: use admin@example.com / password
+              For demo purposes: use admin / ASDqwe123#
             </p>
           </CardFooter>
         </Card>

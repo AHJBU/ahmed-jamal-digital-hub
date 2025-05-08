@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -102,6 +101,7 @@ const allTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
 
 const Blog: React.FC = () => {
   const { translations, language } = useSettings();
+  const navigate = useNavigate();
   const t = translations.blog;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -119,6 +119,10 @@ const Blog: React.FC = () => {
     const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handlePostClick = (id: number) => {
+    navigate(`/blog/${id}`);
+  };
 
   return (
     <Layout>
@@ -165,7 +169,11 @@ const Blog: React.FC = () => {
             <div className="lg:col-span-2">
               <div className="space-y-8">
                 {filteredPosts.map(post => (
-                  <Card key={post.id} className="overflow-hidden card-hover">
+                  <Card 
+                    key={post.id} 
+                    className="overflow-hidden card-hover cursor-pointer transition-all hover:shadow-lg"
+                    onClick={() => handlePostClick(post.id)}
+                  >
                     <div className="md:flex">
                       <div className="md:w-1/3 aspect-video md:aspect-auto">
                         <img 
@@ -181,12 +189,10 @@ const Blog: React.FC = () => {
                         </div>
                         <h3 className="text-xl font-semibold mb-2">{post.title}</h3>
                         <p className="text-muted-foreground mb-4">{post.excerpt}</p>
-                        <Link to={`/blog/${post.id}`}>
-                          <Button variant="ghost" className="px-0">
-                            {t.readMore}
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        </Link>
+                        <Button variant="ghost" className="px-0">
+                          {t.readMore}
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </Card>
